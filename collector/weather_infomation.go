@@ -2,6 +2,7 @@ package collector
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -47,6 +48,14 @@ func GetWeatherInformation(prefectureID int, blockID int, firstDate time.Time, l
 				if len(row) != 0 {
 					hour, _ = strconv.Atoi(row[0])
 					row = []string{row[4], row[3], row[7], row[8]}
+					for index, value := range row {
+						value = regexp.MustCompile(`--`).ReplaceAllString(value, "0.0")
+						value = regexp.MustCompile(` |^[^-]&^[^0-9]|[^0-9]$`).ReplaceAllString(value, "")
+						if value == "" {
+							value = "0"
+						}
+						row[index] = value
+					}
 
 					// Combine row value ​​with location's ID, date infomation and newline character into CSV string
 					csv += location + "," + time.Date(year, month, day, hour-1, 0, 0, 0, time.Local).Format("2006-01-02 15:04:05") + "," + strings.Join(row, ",") + "\n"
